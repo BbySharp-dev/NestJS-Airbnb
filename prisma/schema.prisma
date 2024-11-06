@@ -1,0 +1,136 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model comments {
+  id            Int      @id @default(autoincrement())
+  room_id       Int
+  created_by_id Int
+  date          DateTime @db.DateTime(0)
+  content       String   @db.VarChar(255)
+  rated         Int
+  room          rooms    @relation(fields: [room_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "comments_ibfk_1")
+  created_by    users    @relation(fields: [created_by_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "comments_ibfk_2")
+
+  @@index([created_by_id], map: "created_by_id")
+  @@index([room_id], map: "room_id")
+}
+
+model locations {
+  id      Int     @id @default(autoincrement())
+  address String  @db.VarChar(255)
+  city    String  @db.VarChar(255)
+  country String  @db.VarChar(255)
+  photo   String? @db.VarChar(255)
+  rooms   rooms[]
+}
+
+model reservations {
+  id             Int      @id @default(autoincrement())
+  reserved_by_id Int
+  room_id        Int
+  guests         Int
+  arrival        DateTime @db.DateTime(0)
+  departure      DateTime @db.DateTime(0)
+  reserved_by    users    @relation(fields: [reserved_by_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "reservations_ibfk_1")
+  room           rooms    @relation(fields: [room_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "reservations_ibfk_2")
+
+  @@index([reserved_by_id], map: "reserved_by_id")
+  @@index([room_id], map: "room_id")
+}
+
+model rooms {
+  id              Int                   @id @default(autoincrement())
+  name            String                @db.VarChar(255)
+  location_id     Int
+  price           Int
+  description     String?               @db.VarChar(255)
+  photo           String?               @db.VarChar(255)
+  beds            Int
+  bathrooms       Int
+  guests          Int
+  bedrooms        Int
+  washing_machine rooms_washing_machine
+  electric_iron   rooms_electric_iron
+  television      rooms_television
+  air_conditioner rooms_air_conditioner
+  wifi            rooms_wifi
+  stove           rooms_stove
+  parking         rooms_parking
+  swimming_pool   rooms_swimming_pool
+  comments        comments[]
+  reservations    reservations[]
+  location        locations             @relation(fields: [location_id], references: [id], onDelete: Cascade, map: "rooms_ibfk_2")
+
+  @@index([location_id], map: "location_id")
+}
+
+model users {
+  id           Int            @id @default(autoincrement())
+  avatar       String?        @db.VarChar(255)
+  name         String         @db.VarChar(255)
+  email        String         @db.VarChar(255)
+  password     String         @db.VarChar(255)
+  phone        String         @db.VarChar(255)
+  birthday     DateTime       @db.Date
+  gender       users_gender
+  role         users_role
+  comments     comments[]
+  reservations reservations[]
+}
+
+enum users_role {
+  Guest
+  Admin
+}
+
+enum rooms_washing_machine {
+  true
+  false
+}
+
+enum rooms_electric_iron {
+  true
+  false
+}
+
+enum rooms_television {
+  true
+  false
+}
+
+enum rooms_air_conditioner {
+  true
+  false
+}
+
+enum rooms_wifi {
+  true
+  false
+}
+
+enum rooms_stove {
+  true
+  false
+}
+
+enum rooms_parking {
+  true
+  false
+}
+
+enum rooms_swimming_pool {
+  true
+  false
+}
+
+enum users_gender {
+  Male
+  Female
+  Undefined
+}
